@@ -134,8 +134,11 @@ def pointcloud2_to_array(cloud_msg, split_rgb=False, remove_padding=True):
 
     # remove the dummy fields that were added
     if remove_padding:
-        cloud_arr = cloud_arr[
-            [fname for fname, _type in dtype_list if not (fname[:len(DUMMY_FIELD_PREFIX)] == DUMMY_FIELD_PREFIX)]]
+        # Fixed bug if dtype is in different format than the original and saving binary
+        filtered_dtypes = np.dtype([(fname, cloud_arr.dtype.fields[fname][0]) for fname, _ in dtype_list if not (fname[:len(DUMMY_FIELD_PREFIX)] == DUMMY_FIELD_PREFIX)])
+        filtered_array = np.empty(cloud_arr.shape, dtype=filtered_dtypes)
+        filtered_array[list(filtered_dtypes.names)] = cloud_arr[list(filtered_dtypes.names)]
+        cloud_arr = filtered_array
 
     if split_rgb:
         cloud_arr = split_rgb_field(cloud_arr)
