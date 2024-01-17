@@ -21,7 +21,7 @@ import lzf
 HAS_SENSOR_MSGS = True
 try:
     from sensor_msgs.msg import PointField
-    import numpy_pc2  # needs sensor_msgs
+    from . import numpy_pc2  # needs sensor_msgs
 except ImportError:
     HAS_SENSOR_MSGS = False
 
@@ -694,11 +694,15 @@ class PointCloud(object):
         self.save_pcd(fname, 'ascii')
 
     def save_pcd(self, fname, compression=None, **kwargs):
+        write_type = 'w'
         if 'data_compression' in kwargs:
             warnings.warn('data_compression keyword is deprecated for'
                           ' compression')
             compression = kwargs['data_compression']
-        with open(fname, 'w') as f:
+        if "binary" in compression:
+            write_type = 'wb'
+        
+        with open(fname, write_type) as f:
             point_cloud_to_fileobj(self, f, compression)
 
     def save_pcd_to_fileobj(self, fileobj, compression=None, **kwargs):
